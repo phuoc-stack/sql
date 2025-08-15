@@ -18,13 +18,13 @@ FROM film;
 
 7. SELECT DISTINCT type FROM film;
 
-8. with film_time as (
-select 
+8. WITH film_time as (
+SELECT 
 	id, 
     min(start_time) as min_time, 
     max(start_time) as max_time
-from screening 
-group by id
+FROM screening 
+GROUP BY id
 )
 select id, abs(datediff(min_time, max_time)) as 'Distance in days' from film_time
 
