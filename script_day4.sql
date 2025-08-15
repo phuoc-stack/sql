@@ -32,3 +32,18 @@ select id, abs(datediff(min_time, max_time)) as 'Distance in days' from film_tim
 FROM film 
 INNER JOIN screening ON film.id = screening.film_id
 WHERE name = "Tom&Jerry"
+
+10. SELECT * FROM screening 
+WHERE start_time LIKE '2022-05-25%' OR start_time LIKE '2022-05-24%';
+
+SELECT * FROM film f
+LEFT JOIN screening s ON f.id = s.film_id
+WHERE s.film_id IS NULL;
+
+11. SELECT c.id, c.first_name, c.last_name, b.id as booking_id, COUNT(rs.seat_id) as seats_booked
+FROM customer c
+INNER JOIN booking b ON c.id = b.customer_id
+INNER JOIN reserved_seat rs ON b.id = rs.booking_id
+GROUP BY c.id, c.first_name, c.last_name, b.id
+HAVING COUNT(rs.seat_id) > 1
+ORDER BY seats_booked DESC;
