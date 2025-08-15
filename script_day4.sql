@@ -1,19 +1,34 @@
-1. SELECT * FROM FILM WHERE length_min >100;
+1. SELECT * FROM film WHERE length_min >100;
 
-2. SELECT * FROM FILM  
-WHERE length_min > (SELECT AVG(length_min) FROM FILM);
+2. SELECT * FROM film  
+WHERE length_min > (SELECT AVG(length_min) FROM film);
 
-3. SELECT * FROM FILM
+3. SELECT * FROM film
 WHERE name LIKE 't%';
 
-4. SELECT * FROM FILM
+4. SELECT * FROM film
 WHERE name LIKE '%a%';
 
 5. SELECT COUNT(*)
-FROM FILM 
-WHERE country = "US";
+FROM film 
+WHERE country_code = "US";
 
 6. SELECT MIN(length_min), MAX(length_min)
-FROM FILM;
+FROM film;
 
-7. SELECT DISTINCT genre FROM FILM;
+7. SELECT DISTINCT type FROM film;
+
+8. with film_time as (
+select 
+	id, 
+    min(start_time) as min_time, 
+    max(start_time) as max_time
+from screening 
+group by id
+)
+select id, abs(datediff(min_time, max_time)) as 'Distance in days' from film_time
+
+9. SELECT name, room_name, start_time
+FROM film 
+INNER JOIN screening ON film.id = screening.film_id
+WHERE name = "Tom&Jerry"
