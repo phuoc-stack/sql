@@ -49,6 +49,11 @@ HAVING COUNT(rs.seat_id) > 1
 ORDER BY seats_booked DESC;
 
 12. 
+SELECT DISTINCT room_id
+FROM screening s
+GROUP BY room_id, DATE(start_time)
+HAVING COUNT(DISTINCT film_id) > 2;
+
 SELECT 
     room_id, 
     DATE(start_time) AS screening_day,
