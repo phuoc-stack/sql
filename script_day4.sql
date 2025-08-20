@@ -18,15 +18,11 @@ FROM film;
 
 7. SELECT DISTINCT type FROM film;
 
-8. WITH film_time as (
-SELECT 
-	id, 
-    min(start_time) as min_time, 
-    max(start_time) as max_time
-FROM screening 
-GROUP BY id
-)
-select id, abs(datediff(min_time, max_time)) as 'Distance in days' from film_time
+8. 
+SELECT film.id, film.name, MAX(DATE(start_time)) -MIN(DATE(start_time))
+FROM film 
+JOIN screening ON film.id = screening.film_id
+GROUP BY film.id, film.name
 
 9. SELECT name, room_name, start_time
 FROM film 
