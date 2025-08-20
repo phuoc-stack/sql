@@ -64,3 +64,11 @@ FROM screening
 GROUP BY room_id
 ORDER BY film_count ASC
 LIMIT 1;
+
+14. SELECT f.name FROM sql.film f
+INNER JOIN screening s ON f.id = s.film_id
+LEFT JOIN booking b ON b.screening_id = s.id
+GROUP BY f.name
+HAVING COUNT(b.id) =0;
+
+15. 
