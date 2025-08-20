@@ -71,4 +71,9 @@ LEFT JOIN booking b ON b.screening_id = s.id
 GROUP BY f.name
 HAVING COUNT(b.id) =0;
 
-15. 
+15. SELECT f.name, COUNT(DISTINCT s.room_id) AS room_count
+FROM film f
+JOIN screening s ON f.id = s.film_id
+GROUP BY f.name
+ORDER BY room_count DESC
+LIMIT 1;
