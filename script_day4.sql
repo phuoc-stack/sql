@@ -47,3 +47,20 @@ INNER JOIN reserved_seat rs ON b.id = rs.booking_id
 GROUP BY c.id, c.first_name, c.last_name, b.id
 HAVING COUNT(rs.seat_id) > 1
 ORDER BY seats_booked DESC;
+
+12. 
+SELECT 
+    room_id, 
+    DATE(start_time) AS screening_day,
+    COUNT(film_id) AS film_count
+FROM screening
+GROUP BY 
+    room_id, 
+    DATE(start_time)
+HAVING COUNT(DISTINCT film_id) > 2;
+
+13. SELECT room_id, COUNT(DISTINCT film_id) AS film_count
+FROM screening
+GROUP BY room_id
+ORDER BY film_count ASC
+LIMIT 1;
