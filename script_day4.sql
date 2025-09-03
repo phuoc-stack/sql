@@ -79,3 +79,122 @@ JOIN screening s ON f.id = s.film_id
 GROUP BY f.name
 ORDER BY room_count DESC
 LIMIT 1;
+
+16. SELECT DAYNAME(s.start_time) AS dow,
+COUNT(DISTINCT s.film_id) AS film_count
+FROM screening s
+GROUP BY dow
+ORDER BY film_count DESC;
+
+17. SELECT f.id, f.name,
+COUNT(*) * f.length_min AS total_minutes
+FROM screening s
+JOIN film f ON f.id = s.film_id
+WHERE DATE(s.start_time) = '2022-05-28'
+GROUP BY f.id, f.name, f.length_min
+ORDER BY total_minutes DESC;
+
+18. WITH totals AS (
+  SELECT f.id, f.name, COUNT(s.id) * f.length_min AS total_minutes
+  FROM film f
+  LEFT JOIN screening s ON s.film_id = f.id
+  GROUP BY f.id, f.name, f.length_min
+),
+avg_val AS (
+  SELECT AVG(total_minutes) AS avg_minutes FROM totals
+)
+SELECT t.id, t.name, t.total_minutes,
+       CASE
+         WHEN t.total_minutes > a.avg_minutes THEN 'above'
+         WHEN t.total_minutes < a.avg_minutes THEN 'below'
+         ELSE 'equal'
+       END AS vs_average
+FROM totals t CROSS JOIN avg_val a
+ORDER BY t.total_minutes DESC;
+
+19. SELECT s.room_id, r.name AS room_name, COUNT(*) AS seat_count
+FROM seat s
+JOIN room r ON r.id = s.room_id
+GROUP BY s.room_id, r.name
+ORDER BY seat_count ASC
+LIMIT 1;
+
+20. WITH seat_counts AS (
+  SELECT s.room_id, COUNT(*) AS seat_count
+  FROM seat s
+  GROUP BY s.room_id
+),
+avg_ct AS (
+  SELECT AVG(seat_count) AS avg_seats FROM seat_counts
+)
+SELECT r.id AS room_id, r.name AS room_name, sc.seat_count
+FROM seat_counts sc
+JOIN room r ON r.id = sc.room_id
+JOIN avg_ct a
+WHERE sc.seat_count > a.avg_seats
+ORDER BY sc.seat_count DESC;
+
+21. SELECT s2.id AS seat_id, s2.row_no, s2.seat_no
+FROM booking b1
+JOIN screening sc ON sc.id = b1.screening_id
+JOIN seat s2 ON s2.room_id = sc.room_id
+LEFT JOIN reserved_seat rs
+       ON rs.seat_id = s2.id
+      AND rs.booking_id IN (SELECT id FROM booking WHERE screening_id = sc.id)
+WHERE b1.id = 1
+  AND rs.seat_id IS NULL;
+
+22. SELECT f.id, f.name, COUNT(s.id) AS total_screenings
+FROM film f
+JOIN screening s ON s.film_id = f.id
+GROUP BY f.id, f.name
+HAVING COUNT(s.id) > 10
+ORDER BY total_screenings DESC;
+
+23. SELECT DAYNAME(sc.start_time) AS dow,
+       COUNT(b.id) AS total_bookings
+FROM booking b
+JOIN screening sc ON sc.id = b.screening_id
+GROUP BY dow
+ORDER BY total_bookings DESC
+LIMIT 3;
+
+24. SELECT f.id, f.name,
+       COUNT(b.id) / NULLIF(COUNT(DISTINCT s.id), 0) AS booking_rate
+FROM film f
+LEFT JOIN screening s ON s.film_id = f.id
+LEFT JOIN booking  b ON b.screening_id = s.id
+GROUP BY f.id, f.name
+ORDER BY booking_rate DESC, f.name;
+
+25. WITH room_counts AS (
+  SELECT f.id, f.name, COUNT(DISTINCT s.room_id) AS room_count
+  FROM film f
+  JOIN screening s ON s.film_id = f.id
+  GROUP BY f.id, f.name
+),
+avg_ct AS ( SELECT AVG(room_count) AS avg_room_count FROM room_counts )
+SELECT rc.id, rc.name, rc.room_count,
+    CASE
+        WHEN rc.room_count > a.avg_room_count THEN 'above'
+        WHEN rc.room_count < a.avg_room_count THEN 'below'
+        ELSE 'equal'
+    END AS vs_average
+FROM room_counts rc
+CROSS JOIN avg_ct a
+ORDER BY rc.room_count DESC, rc.name;
+
+26. WITH ranked AS (
+  SELECT c.id, c.first_name, c.last_name,
+         SUM(f.length_min) AS total_minutes,
+         DENSE_RANK() OVER (ORDER BY SUM(f.length_min)) AS rnk
+  FROM customer c
+  JOIN booking b ON b.customer_id = c.id
+  JOIN screening s ON s.id = b.screening_id
+  JOIN film f ON f.id = s.film_id
+  GROUP BY c.id, c.first_name, c.last_name
+)
+SELECT *
+FROM ranked
+WHERE rnk <= 2
+ORDER BY rnk, total_minutes;
